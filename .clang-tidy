@@ -1,7 +1,7 @@
 ---
-Checks:          '*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*'
-WarningsAsErrors: '1'
-HeaderFilterRegex: ''
+Checks:          '*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*,-cert-err58-cpp,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers'
+WarningsAsErrors: '0'
+HeaderFilterRegex: '*/narnia_engine/*'
 FormatStyle:     none
 
 
