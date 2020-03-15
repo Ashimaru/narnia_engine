@@ -19,6 +19,7 @@ conan_cmake_run(
   fmt/6.1.2
   spdlog/1.5.0
   glm/0.9.9.7
+  tinyobjloader/1.0.6@_/_ 
   sdl2/2.0.10@bincrafters/stable
   OPTIONS
   ${CONAN_EXTRA_OPTIONS}

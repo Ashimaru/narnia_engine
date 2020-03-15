@@ -6,17 +6,19 @@ using std::make_unique;
 using std::vector;
 using std::array;
 
-const int FramesInFlightCount = 3;
+namespace{
+constexpr int NUMBER_OF_FRAMES_IN_FLIGHT = 3;
+}
 
 Renderer::Renderer() :
 	m_currentFrameIndex(0),
-	m_renderMode(nullptr),
+	m_renderMode{},
 	m_gpu(nullptr),
 	m_resourceManager(nullptr)
 {
 }
 
-bool Renderer::init(const GPUPtr &gpu, const ResourceManagerAPIPtr &resMan, RenderModePtr renderMode)
+bool Renderer::init(const GPUPtr &gpu, const ResourceManagerAPIPtr &resMan, SimpleRenderMode renderMode)
 {
 	m_resourceManager = resMan;
 	m_gpu = gpu;
@@ -42,7 +44,7 @@ void Renderer::draw()
 		waitSemaphores,
 		waitStages,
 		1, 
-		m_renderMode->getCommandBuffer(m_currentFrameIndex),
+		&m_renderMode.commandBuffers[m_currentFrameIndex],
 		1, signalSemaphores
 	};
 
@@ -57,15 +59,15 @@ void Renderer::draw()
 
 	m_gpu->submitToPresentationQueue(presentInfo);
 
-	m_currentFrameIndex = ++m_currentFrameIndex % FramesInFlightCount;
+	m_currentFrameIndex = ++m_currentFrameIndex % NUMBER_OF_FRAMES_IN_FLIGHT;
 
 }
 
 void Renderer::cleanUp()
 {
-	m_renderMode->cleanUp();
+	m_gpu->deleteRenderMode(std::move(m_renderMode));
 
-	for (auto i = 0; i < FramesInFlightCount; i++)
+	for (auto i = 0; i < NUMBER_OF_FRAMES_IN_FLIGHT; i++)
 	{
 		m_gpu->deleteSemaphore(m_renderFinishedSemaphores[i]);
 		m_gpu->deleteSemaphore(m_imageAvailableSemaphores[i]);
@@ -75,16 +77,16 @@ void Renderer::cleanUp()
 
 bool Renderer::createSyncObjects()
 {
-	m_imageAvailableSemaphores.resize(FramesInFlightCount);
-	m_renderFinishedSemaphores.resize(FramesInFlightCount);
-	m_frameFences.resize(FramesInFlightCount);
+	m_imageAvailableSemaphores.resize(NUMBER_OF_FRAMES_IN_FLIGHT);
+	m_renderFinishedSemaphores.resize(NUMBER_OF_FRAMES_IN_FLIGHT);
+	m_frameFences.resize(NUMBER_OF_FRAMES_IN_FLIGHT);
 
 
 	auto semaphoreInfo = vk::SemaphoreCreateInfo();
 	auto fenceInfo = vk::FenceCreateInfo();
 	fenceInfo.setFlags(vk::FenceCreateFlags(vk::FenceCreateFlagBits::eSignaled));
 
-	for (auto i = 0; i < FramesInFlightCount; ++i)
+	for (auto i = 0; i < NUMBER_OF_FRAMES_IN_FLIGHT; ++i)
 	{
 		m_gpu->createSemaphore(semaphoreInfo, m_imageAvailableSemaphores[i]);
 		m_gpu->createSemaphore(semaphoreInfo, m_renderFinishedSemaphores[i]);

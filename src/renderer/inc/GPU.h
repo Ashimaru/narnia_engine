@@ -1,6 +1,7 @@
 #pragma once
 #include "RenderableObject.h"
 #include "ModelResource.h"
+#include "SimpleRenderMode.h"
 
 
 struct QueueFamilies {
@@ -16,8 +17,7 @@ public:
 
 	void waitForRender() const;
 	void cleanUp();
-
-
+	
 	void waitForFence(vk::Fence *fence) const;
 	void resetFence(const vk::Fence *fence) const;
 	void acquireNextImage(const vk::Semaphore &semaphore) const;
@@ -25,6 +25,8 @@ public:
 	void submitToPresentationQueue(const vk::PresentInfoKHR &presentInfo) const;
 
 	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties) const;
+
+	void deleteRenderMode(SimpleRenderMode && mode) const;
 	
 	void loadROToMemory(const ModelResourcePtr &model, RenderableObjectPtr &renderObject) const;
 	void unloadROFromMemory(const RenderableObjectPtr &renderObject) const;

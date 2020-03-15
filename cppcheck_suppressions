@@ -1,3 +1,4 @@
+unmatchedSuppression:*
 unusedFunction:*
 *:*Vulkan*
 *:*.conan*

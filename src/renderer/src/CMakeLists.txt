@@ -4,8 +4,6 @@ add_library(renderer STATIC
             RenderableObject.cpp
             RenderEngine.cpp
             Renderer.cpp
-            Scene.cpp
-            SimpleRenderMode.cpp
             SimpleRenderModeFactory.cpp
 )
 

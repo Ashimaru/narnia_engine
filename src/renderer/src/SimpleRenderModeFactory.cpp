@@ -3,6 +3,7 @@
 #include "Vertex.h"
 
 #include <array>
+#include <cassert>
 
 using std::array;
 
@@ -12,12 +13,9 @@ SimpleRenderModeFactory::SimpleRenderModeFactory(GPUPtr &gpu, const ScenePtr &sc
 {
 } 
 
-RenderModePtr SimpleRenderModeFactory::createRenderMode(vk::Format swapchainFormat, vk::Extent2D extent, const std::vector<vk::PipelineShaderStageCreateInfo> &shaders)
+SimpleRenderMode SimpleRenderModeFactory::createRenderMode(vk::Format swapchainFormat, vk::Extent2D extent, const std::vector<vk::PipelineShaderStageCreateInfo> &shaders)
 {
-	m_renderModeInstance = std::make_unique<SimpleRenderMode>(m_gpu);
-
-	if (!createRenderPass(swapchainFormat))
-		return nullptr;
+	assert(createRenderPass(swapchainFormat));
 
 	createPipelineLayout();
 
@@ -33,64 +31,62 @@ RenderModePtr SimpleRenderModeFactory::createRenderMode(vk::Format swapchainForm
 	scissors.setOffset({ 0,0 });
 	scissors.setExtent(extent);
 
-	if (!createPipeline(shaders, viewport, scissors))
-		return nullptr;
+	assert(createPipeline(shaders, viewport, scissors));
 
-	if (!createSwapchain(extent))
-		return nullptr;
+	assert(createSwapchain(extent));
 
 	createCommandPool();
 
 	recordCommandBuffers();
 
-	return std::move(static_cast<RenderModePtr>(std::move(m_renderModeInstance)));
+	return m_result;
 }
 
 void SimpleRenderModeFactory::recordCommandBuffers()
 {
-	m_renderModeInstance->m_commandBuffers.resize(m_renderModeInstance->m_swapchainFramebuffers.size());
+	m_result.commandBuffers.resize(m_result.swapchainFramebuffers.size());
 
 	auto commandBufferAllocInfo = vk::CommandBufferAllocateInfo();
-	commandBufferAllocInfo.setCommandBufferCount(static_cast<uint32_t>(m_renderModeInstance->m_commandBuffers.size()));
-	commandBufferAllocInfo.setCommandPool(m_renderModeInstance->m_commandPool);
+	commandBufferAllocInfo.setCommandBufferCount(static_cast<uint32_t>(m_result.commandBuffers.size()));
+	commandBufferAllocInfo.setCommandPool(m_result.commandPool);
 	commandBufferAllocInfo.setLevel(vk::CommandBufferLevel::ePrimary);
 
 
-	m_gpu->createCommandBuffers(commandBufferAllocInfo, m_renderModeInstance->m_commandBuffers.data());
+	m_gpu->createCommandBuffers(commandBufferAllocInfo, m_result.commandBuffers.data());
 
-	for (size_t i = 0; i < m_renderModeInstance->m_commandBuffers.size(); ++i)
+	for (size_t i = 0; i < m_result.commandBuffers.size(); ++i)
 	{
 		auto beginInfo = vk::CommandBufferBeginInfo();
 		beginInfo.setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse);
 
-		if (vk::Result::eSuccess != m_renderModeInstance->m_commandBuffers[i].begin(&beginInfo))
+		if (vk::Result::eSuccess != m_result.commandBuffers[i].begin(&beginInfo))
 		{
 			LoggerAPI::getLogger()->logCritical("Could not begin record command buffer");
 		}
 
 		auto renderPassBeginInfo = vk::RenderPassBeginInfo();
-		renderPassBeginInfo.setRenderPass(m_renderModeInstance->m_renderPass);
-		renderPassBeginInfo.setFramebuffer(m_renderModeInstance->m_swapchainFramebuffers[i]);
+		renderPassBeginInfo.setRenderPass(m_result.renderPass);
+		renderPassBeginInfo.setFramebuffer(m_result.swapchainFramebuffers[i]);
 		auto renderArea = vk::Rect2D({ 0,0 }, m_gpu->getPresentationExtent());
 		renderPassBeginInfo.setRenderArea(renderArea);
 		renderPassBeginInfo.setClearValueCount(1);
 		vk::ClearValue clearValues[] = { 0.0, 0.0, 0.0, 1.0 };
 		renderPassBeginInfo.setPClearValues(clearValues);
 
-		m_renderModeInstance->m_commandBuffers[i].beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
-		m_renderModeInstance->m_commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_renderModeInstance->m_pipeline);
+		m_result.commandBuffers[i].beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+		m_result.commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_result.pipeline);
 		for (const auto &ro : m_scene->renderableObjects)
 		{
 			vk::DeviceSize offset[] = { 0 };
 
-			m_renderModeInstance->m_commandBuffers[i].bindVertexBuffers(0, 1, &ro->sharedBuffer, offset);
-			m_renderModeInstance->m_commandBuffers[i].bindIndexBuffer(ro->sharedBuffer, ro->vertexOffset, vk::IndexType::eUint32);
-			m_renderModeInstance->m_commandBuffers[i].drawIndexed(ro->indexCount, 1, 0, 0, 0);
+			m_result.commandBuffers[i].bindVertexBuffers(0, 1, &ro->sharedBuffer, offset);
+			m_result.commandBuffers[i].bindIndexBuffer(ro->sharedBuffer, ro->vertexOffset, vk::IndexType::eUint32);
+			m_result.commandBuffers[i].drawIndexed(ro->indexCount, 1, 0, 0, 0);
 
 		}
-		m_renderModeInstance->m_commandBuffers[i].endRenderPass();
+		m_result.commandBuffers[i].endRenderPass();
 
-		m_renderModeInstance->m_commandBuffers[i].end();
+		m_result.commandBuffers[i].end();
 	}
 
 }
@@ -133,7 +129,7 @@ bool SimpleRenderModeFactory::createRenderPass(vk::Format swapchainFormat)
 	renderPassInfo.setDependencyCount(1);
 	renderPassInfo.setPDependencies(&subpassDependency);
 
-	m_gpu->createRenderPass(renderPassInfo, m_renderModeInstance->m_renderPass);
+	m_gpu->createRenderPass(renderPassInfo, m_result.renderPass);
 
 	return true;
 }
@@ -144,7 +140,7 @@ void SimpleRenderModeFactory::createPipelineLayout()
 	layoutCreateInfo.setSetLayoutCount(0);
 	layoutCreateInfo.setPushConstantRangeCount(0);
 
-	m_gpu->createPipelineLayout(layoutCreateInfo, m_renderModeInstance->m_pipelineLayout);
+	m_gpu->createPipelineLayout(layoutCreateInfo, m_result.pipelineLayout);
 }
 
 bool SimpleRenderModeFactory::createPipeline(const std::vector<vk::PipelineShaderStageCreateInfo> &shaders, const vk::Viewport &viewport, const vk::Rect2D &scissors)
@@ -233,30 +229,30 @@ bool SimpleRenderModeFactory::createPipeline(const std::vector<vk::PipelineShade
 
 
 	pipelineCreateInfo.setPDynamicState(nullptr); //not supported
-	pipelineCreateInfo.setLayout(m_renderModeInstance->m_pipelineLayout);
-	pipelineCreateInfo.setRenderPass(m_renderModeInstance->m_renderPass);
+	pipelineCreateInfo.setLayout(m_result.pipelineLayout);
+	pipelineCreateInfo.setRenderPass(m_result.renderPass);
 	pipelineCreateInfo.setSubpass(0);
 
-	m_gpu->createPipeline(pipelineCreateInfo, m_renderModeInstance->m_pipeline);
+	m_gpu->createPipeline(pipelineCreateInfo, m_result.pipeline);
 
 	return true;
 }
 
 bool SimpleRenderModeFactory::createSwapchain(vk::Extent2D extent)
 {
-	m_renderModeInstance->m_swapchainFramebuffers.resize(m_gpu->getSwapchainImagesCount());
+	m_result.swapchainFramebuffers.resize(m_gpu->getSwapchainImagesCount());
 
-	for (int i = 0; i < m_renderModeInstance->m_swapchainFramebuffers.size(); ++i)
+	for (int i = 0; i < m_result.swapchainFramebuffers.size(); ++i)
 	{
 		auto createInfo = vk::FramebufferCreateInfo();
-		createInfo.setRenderPass(m_renderModeInstance->m_renderPass);
+		createInfo.setRenderPass(m_result.renderPass);
 		createInfo.setAttachmentCount(1);
 		createInfo.setWidth(extent.width);
 		createInfo.setHeight(extent.height);
 		createInfo.setLayers(1);
 
 
-		m_gpu->createFramebuffer(createInfo, i, m_renderModeInstance->m_swapchainFramebuffers[i]);
+		m_gpu->createFramebuffer(createInfo, i, m_result.swapchainFramebuffers[i]);
 	}
 
 	return true;
@@ -264,7 +260,7 @@ bool SimpleRenderModeFactory::createSwapchain(vk::Extent2D extent)
 
 void SimpleRenderModeFactory::createCommandPool()
 {
-	m_gpu->createGraphicsCommandPool(m_renderModeInstance->m_commandPool);
+	m_gpu->createGraphicsCommandPool(m_result.commandPool);
 }
 
 bool createCommandBuffers()

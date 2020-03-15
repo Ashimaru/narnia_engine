@@ -10,7 +10,7 @@ public:
 	Renderer();
 	~Renderer() = default;
 
-	bool init(const GPUPtr &gpu, const ResourceManagerAPIPtr &resMan, RenderModePtr renderMode);
+	bool init(const GPUPtr &gpu, const ResourceManagerAPIPtr &resMan, SimpleRenderMode renderMode);
 
 	void draw();
 	void cleanUp();
@@ -24,7 +24,7 @@ private:
 	std::vector<vk::Semaphore> m_renderFinishedSemaphores;
 	std::vector<vk::Fence> m_frameFences;
 
-	RenderModePtr m_renderMode;
+	SimpleRenderMode m_renderMode;
 	GPUPtr m_gpu;
 	ResourceManagerAPIPtr m_resourceManager;
 };

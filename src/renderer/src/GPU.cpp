@@ -62,6 +62,21 @@ uint32_t GPU::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags proper
 	return uint32_t{ 0 };
 }
 
+void GPU::deleteRenderMode(SimpleRenderMode&& mode) const
+{
+	deletePipeline(mode.pipeline);
+	deleteRenderPass(mode.renderPass);
+	deletePipelineLayout(mode.pipelineLayout);
+
+	deleteCommandBuffer(mode.commandPool, mode.commandBuffers);
+	deleteCommandPool(mode.commandPool);
+
+	for(auto& framebuffer : mode.swapchainFramebuffers)
+	{
+		deleteFramebuffer(framebuffer);
+	}
+}
+
 void GPU::createCommandBuffers(const vk::CommandBufferAllocateInfo & allocateInfo, vk::CommandBuffer * buffer) const
 {
 	m_device.allocateCommandBuffers(&allocateInfo, buffer);

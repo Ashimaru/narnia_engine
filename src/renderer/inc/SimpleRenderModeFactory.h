@@ -8,7 +8,7 @@ public:
 	SimpleRenderModeFactory(GPUPtr &gpu, const ScenePtr &scene);
 	~SimpleRenderModeFactory() override = default;
 
-	RenderModePtr createRenderMode(vk::Format swapchainFormat, vk::Extent2D extent, const std::vector<vk::PipelineShaderStageCreateInfo> &shaders) override;
+	SimpleRenderMode createRenderMode(vk::Format swapchainFormat, vk::Extent2D extent, const std::vector<vk::PipelineShaderStageCreateInfo> &shaders) override;
 
 protected:
 	void recordCommandBuffers();
@@ -19,7 +19,8 @@ protected:
 
 	bool createSwapchain(vk::Extent2D extent);
 	void createCommandPool();
-	SimpleRenderModePtr m_renderModeInstance;
+
+	SimpleRenderMode m_result;
 	GPUPtr m_gpu;
 	ScenePtr m_scene;
 };

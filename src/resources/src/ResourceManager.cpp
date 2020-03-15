@@ -8,7 +8,7 @@
 namespace{
 const std::string SHADERS_PATH = "./Shaders/";
 const std::string CONFIG_FILE = "index.lst";
-}
+
 
 ModelResourcePtr createRectangleModel()
 {
@@ -38,7 +38,7 @@ ModelResourcePtr createTriangleModel()
 	};
 	return std::make_shared<ModelResource>("triangle", verticies, indices);
 }
-
+}
 
 ResourceManagerAPIPtr ResourceManagerAPI::createInstance()
 {

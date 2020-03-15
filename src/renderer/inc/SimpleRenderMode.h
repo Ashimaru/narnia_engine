@@ -1,20 +1,14 @@
 #pragma once
-#include "AbstractRenderMode.h"
+#include "vulkan\vulkan.hpp"
 
-class SimpleRenderMode : public AbstractRenderMode
+struct SimpleRenderMode
 {
-public:
-	explicit SimpleRenderMode(GPUPtr &gpu);
-	~SimpleRenderMode() override = default;
+	vk::Pipeline pipeline;
+	vk::RenderPass renderPass;
+	vk::PipelineLayout pipelineLayout;
 
-	virtual void cleanUp() override;
-	virtual vk::CommandBuffer* getCommandBuffer(const size_t index) override;
+	vk::CommandPool commandPool;
 
-	friend class SimpleRenderModeFactory;
-
-private:
-	GPUPtr m_gpu;
+	std::vector<vk::CommandBuffer> commandBuffers;
+	std::vector<vk::Framebuffer> swapchainFramebuffers;
 };
-
-using SimpleRenderModePtr = std::unique_ptr<SimpleRenderMode>;
-
