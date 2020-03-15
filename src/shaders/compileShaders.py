@@ -17,7 +17,10 @@ def compileShader(filename, registry):
 	inputPath = shaderSource + "\\" + filename
 	command = shaderCompiler + " -V " + inputPath + " -o " + outputPath
 	print("Calling command: " + command)
-	call(command)
+	returnCode = call(command)
+	if returnCode != 0:
+		print("Failed to build one of shaders, exiting" + str(returnCode))
+		exit(returnCode)
 	registry.write(name + " " + outputFileName + "\n")
 
 
@@ -38,13 +41,6 @@ if not os.path.exists(shaderDest):
 with open(regFile, 'a') as registry:
 	for file in shaderSrc:
 		compileShader(file, registry)
-
-
-	
-
-
-	
-
 	
 
 	
