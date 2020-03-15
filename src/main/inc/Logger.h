@@ -22,7 +22,7 @@ public:
 
 	void logWarning(const std::string &log) override;
 
-	~Logger();
+	~Logger() = default;
 
 private:
 	Logger();

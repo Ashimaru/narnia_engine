@@ -10,7 +10,9 @@ LoggerAPIPtr LoggerAPI::m_instance = nullptr;
 LoggerAPIPtr LoggerAPI::getLogger()
 {
 	if (m_instance == nullptr)
+	{
 		m_instance = LoggerPtr(new Logger());
+	}
 	return m_instance;
 }
 
@@ -55,8 +57,4 @@ Logger::Logger()
 	remove(logPath.c_str());
 	m_logger = spdlog::basic_logger_mt(loggerName, logPath);
 	m_logger->flush_on(spdlog::level::info);
-}
-
-Logger::~Logger()
-{
 }
