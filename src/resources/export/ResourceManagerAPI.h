@@ -1,6 +1,7 @@
 #pragma once
+#include <memory>
 #include "ShaderResource.h"
-#include "ModelResource.h"
+#include "ResourceDefs.h"
 
 class ResourceManagerAPI;
 using ResourceManagerAPIPtr = std::shared_ptr<ResourceManagerAPI>;
@@ -11,7 +12,7 @@ public:
 
 	virtual void LoadResources() = 0;
 	virtual const ShaderResource& getShader(const std::string &shaderName) const = 0;
-	virtual ModelResourcePtr getModel(const std::string &modelName) const = 0;
+	virtual ModelData getModel(const std::string &modelName) = 0;
 	virtual void cleanUp() = 0;
 	
 	static ResourceManagerAPIPtr createInstance();

@@ -128,8 +128,8 @@ RenderableObjectAPIPtr RenderEngine::createObject(const std::string &name, const
   auto model = m_resourceManager->getModel(modelName);
   auto object = std::make_shared<RenderableObject>(name);
 
-  object->indexCount = static_cast<uint32_t>(model->indicies.size());
-  object->vertexOffset = model->verticies.size() * sizeof(Vertex);
+  object->indexCount = static_cast<uint32_t>(model.indicies.size());
+  object->vertexOffset = model.verticies.size() * sizeof(Vertex);
 
   m_gpu->loadROToMemory(model, object);
 

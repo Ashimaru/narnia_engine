@@ -137,9 +137,9 @@ size_t GPU::getSwapchainImagesCount() const
 	return m_swapchainImageViews.size();
 }
 
-void GPU::loadROToMemory(const ModelResourcePtr & model, RenderableObjectPtr &renderObject) const
+void GPU::loadROToMemory(const ModelData & model, RenderableObjectPtr &renderObject) const
 {
-	createSharedBuffer(model->verticies, model->indicies, renderObject->sharedBuffer, renderObject->sharedBufferMemory);
+	createSharedBuffer(model.verticies, model.indicies, renderObject->sharedBuffer, renderObject->sharedBufferMemory);
 }
 
 void GPU::unloadROFromMemory(const RenderableObjectPtr & renderObject) const

@@ -1,5 +1,6 @@
 #pragma once
 #include "ResourceManagerAPI.h"
+#include "ModelResource.h"
 
 class ResourceManager : public ResourceManagerAPI
 {
@@ -9,7 +10,7 @@ public:
 
 	void LoadResources() override;
 	const ShaderResource& getShader(const std::string &shaderName) const override;
-	ModelResourcePtr getModel(const std::string &modelName) const override;
+	ModelData getModel(const std::string &modelName) override;
 
 	void cleanUp() override;
 
@@ -17,7 +18,7 @@ public:
 private:
 	
 	std::vector<ShaderResource> m_shaderModules;
-	std::vector<ModelResourcePtr>  m_models;
+	std::vector<ModelResource>  m_models;
 
 	void loadShaders();
 	void loadModels();

@@ -1,6 +1,6 @@
 #pragma once
 #include "RenderableObject.h"
-#include "ModelResource.h"
+#include "ResourceDefs.h"
 #include "SimpleRenderMode.h"
 
 
@@ -28,7 +28,7 @@ public:
 
 	void deleteRenderMode(SimpleRenderMode && mode) const;
 	
-	void loadROToMemory(const ModelResourcePtr &model, RenderableObjectPtr &renderObject) const;
+	void loadROToMemory(const ModelData &model, RenderableObjectPtr &renderObject) const;
 	void unloadROFromMemory(const RenderableObjectPtr &renderObject) const;
 
 	void createRenderPass(vk::RenderPassCreateInfo &createInfo, vk::RenderPass &renderPass) const;

@@ -12,6 +12,7 @@ public:
 
 	std::vector<Vertex> verticies;
 	std::vector<uint32_t> indicies;
+
+	std::uint32_t usageCounter{0};
 };
-using ModelResourcePtr = std::shared_ptr<ModelResource>;
 

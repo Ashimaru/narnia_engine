@@ -10,7 +10,7 @@ const std::string SHADERS_PATH = "./Shaders/";
 const std::string CONFIG_FILE = "index.lst";
 
 
-ModelResourcePtr createRectangleModel()
+ModelResource createRectangleModel()
 {
 	std::vector<Vertex> verticies = {
 	{ { -0.9F, -0.9F, 0.0F },{ 1.0F, 0.0F, 0.0F, 1.0F } },
@@ -22,10 +22,10 @@ ModelResourcePtr createRectangleModel()
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 1, 0, 3
 	};
-	return std::make_shared<ModelResource>("rectangle", verticies, indices);
+	return ModelResource("rectangle", std::move(verticies), std::move(indices));
 }
 
-ModelResourcePtr createTriangleModel()
+ModelResource createTriangleModel()
 {
 	std::vector<Vertex> verticies = {
 	{ {  0.1F,  0.8F, 0.0F },{ 1.0F, 0.0F, 0.0F, 1.0F } },
@@ -36,7 +36,7 @@ ModelResourcePtr createTriangleModel()
 	std::vector<uint32_t> indices = {
 		0, 1, 2
 	};
-	return std::make_shared<ModelResource>("triangle", verticies, indices);
+	return ModelResource("triangle", std::move(verticies), std::move(indices));
 }
 }
 
@@ -62,14 +62,16 @@ const ShaderResource& ResourceManager::getShader(const std::string & shaderName)
 	return *it;
 }
 
-ModelResourcePtr ResourceManager::getModel(const std::string & modelName) const
+ModelData ResourceManager::getModel(const std::string & modelName)
 {
-	auto it = std::find_if(begin(m_models), end(m_models), [&modelName](const ModelResourcePtr &model)
+	auto it = std::find_if(begin(m_models), end(m_models), [&modelName](const ModelResource &model)
 	{
-		return model->name == modelName;
+		return model.name == modelName;
 	});
 
-	return it == std::end(m_models) ? nullptr : *it;
+	assert(it != std::end(m_models));
+
+	return ModelData(it->verticies, it->indicies, it->usageCounter);
 }
 
 void ResourceManager::cleanUp()
