@@ -8,7 +8,6 @@ class LoggerAPI
 {
 public:
 	static LoggerAPIPtr getLogger();
-	static void freeLogger();
 	
 	virtual void logInfo(const std::string &log) = 0;
 	virtual void logInfo(const char *log) = 0;

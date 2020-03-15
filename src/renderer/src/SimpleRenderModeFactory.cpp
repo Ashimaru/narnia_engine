@@ -15,7 +15,9 @@ SimpleRenderModeFactory::SimpleRenderModeFactory(GPUPtr &gpu, const ScenePtr &sc
 
 SimpleRenderMode SimpleRenderModeFactory::createRenderMode(vk::Format swapchainFormat, vk::Extent2D extent, const std::vector<vk::PipelineShaderStageCreateInfo> &shaders)
 {
-	assert(createRenderPass(swapchainFormat));
+
+	bool succeed = createRenderPass(swapchainFormat);
+	assert(succeed);
 
 	createPipelineLayout();
 
@@ -31,9 +33,11 @@ SimpleRenderMode SimpleRenderModeFactory::createRenderMode(vk::Format swapchainF
 	scissors.setOffset({ 0,0 });
 	scissors.setExtent(extent);
 
-	assert(createPipeline(shaders, viewport, scissors));
+	succeed = createPipeline(shaders, viewport, scissors);
+	assert(succeed);
 
-	assert(createSwapchain(extent));
+	succeed = createSwapchain(extent);
+	assert(succeed);
 
 	createCommandPool();
 

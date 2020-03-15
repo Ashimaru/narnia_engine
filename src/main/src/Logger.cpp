@@ -16,11 +16,6 @@ LoggerAPIPtr LoggerAPI::getLogger()
 	return m_instance;
 }
 
-void LoggerAPI::freeLogger()
-{
-	m_instance.reset();
-}
-
 void Logger::logInfo(const std::string & log)
 {
 	m_logger->info(log);
