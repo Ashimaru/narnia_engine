@@ -15,7 +15,9 @@ public:
 	
 	virtual void waitForRendererToFinish() = 0;
 	virtual void cleanUp() = 0;
-	virtual RenderableObjectAPIPtr createObject(const std::string &id, const std::string &modelName) = 0;
+
+	virtual RenderableObjectAPIPtr createObject(std::string id, const std::string &modelName) = 0;
+	virtual RenderableObjectAPIPtr createObject(std::string id, const std::string &modelName, glm::vec3 position) = 0;
 
 	static RenderEngineAPIPtr createInstance();
 };

@@ -3,6 +3,12 @@
 #include "LoggerAPI.h"
 #include "SimpleRenderModeFactory.h"
 #include "SDL2/SDL_vulkan.h"
+#include <fmt/core.h>
+
+#pragma warning(disable : 4201)
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/ext.hpp>
+#pragma warning(default : 4201)
 
 using vk::ApplicationInfo;
 using vk::InstanceCreateInfo;
@@ -59,9 +65,6 @@ int RenderEngine::init(const ResourceManagerAPIPtr &resourceManager)
   m_gpu = GPUFactory::createGPU(m_vulcanInstance, m_surface, getValidationLayers());
   m_renderModeFactory = std::make_unique<SimpleRenderModeFactory>(m_gpu, m_scene);
 
-  createObject("TestRectangle", "rectangle");
-  createObject("TestTriangle", "triangle");
-
   auto shaders = createShaderStages();
   auto swapchainFormat = m_gpu->getSwapchanFormat();
   auto viewportExtent = m_gpu->getPresentationExtent();
@@ -95,11 +98,11 @@ void RenderEngine::cleanUp()
   }
   m_loadedShaders.clear();
 
-  m_renderer->cleanUp();
   m_resourceManager->cleanUp();
   m_gpu->cleanUp();
   m_vulcanInstance.destroySurfaceKHR(m_surface);
   m_vulcanInstance.destroy();
+
   SDL_DestroyWindow(m_window);
   SDL_Quit();
 }
@@ -123,10 +126,27 @@ bool RenderEngine::pollForWindowClose()
   return false;
 }
 
-RenderableObjectAPIPtr RenderEngine::createObject(const std::string &name, const std::string &modelName)
+RenderableObjectAPIPtr RenderEngine::createObject(std::string name, const std::string &modelName)
 {
-  auto model = m_resourceManager->getModel(modelName);
+  LoggerAPI::getLogger()->logInfo(fmt::format("Creating object {} with model {}", name, modelName));
+  auto model = m_resourceManager->getModel(std::move(modelName));
   auto object = std::make_shared<RenderableObject>(name);
+
+  object->indexCount = static_cast<uint32_t>(model.indicies.size());
+  object->vertexOffset = model.verticies.size() * sizeof(Vertex);
+
+  m_gpu->loadROToMemory(model, object);
+
+  m_scene->renderableObjects.emplace_back(object);
+
+  return object;
+}
+
+RenderableObjectAPIPtr RenderEngine::createObject(std::string name, const std::string &modelName, glm::vec3 position)
+{
+  LoggerAPI::getLogger()->logInfo(fmt::format("Creating object {} with model {} at ", name, modelName, glm::to_string(position)));
+  auto model = m_resourceManager->getModel(modelName);
+  auto object = std::make_shared<RenderableObject>(std::move(name), std::move(position));
 
   object->indexCount = static_cast<uint32_t>(model.indicies.size());
   object->vertexOffset = model.verticies.size() * sizeof(Vertex);

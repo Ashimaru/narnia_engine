@@ -19,7 +19,8 @@ public:
 	void waitForRendererToFinish() override;
 	void cleanUp() override;
 
-	RenderableObjectAPIPtr createObject(const std::string &name, const std::string &modelName) override;
+	RenderableObjectAPIPtr createObject(std::string name, const std::string &modelName) override;
+	RenderableObjectAPIPtr createObject(std::string id, const std::string &modelName, glm::vec3 position) override;
 
 	static std::vector<const char *> getValidationLayers();
 

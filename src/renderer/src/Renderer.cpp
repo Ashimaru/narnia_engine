@@ -27,6 +27,18 @@ bool Renderer::init(const GPUPtr &gpu, const ResourceManagerAPIPtr &resMan, Simp
 	return createSyncObjects();
 }
 
+Renderer::~Renderer()
+{
+	m_gpu->deleteRenderMode(std::move(m_renderMode));
+
+	for (auto i = 0; i < NUMBER_OF_FRAMES_IN_FLIGHT; i++)
+	{
+		m_gpu->deleteSemaphore(m_renderFinishedSemaphores[i]);
+		m_gpu->deleteSemaphore(m_imageAvailableSemaphores[i]);
+		m_gpu->deleteFence(m_frameFences[i]);
+	}
+}
+
 void Renderer::draw()
 {
 	m_gpu->waitForFence(&m_frameFences[m_currentFrameIndex]);
@@ -61,18 +73,6 @@ void Renderer::draw()
 
 	m_currentFrameIndex = ++m_currentFrameIndex % NUMBER_OF_FRAMES_IN_FLIGHT;
 
-}
-
-void Renderer::cleanUp()
-{
-	m_gpu->deleteRenderMode(std::move(m_renderMode));
-
-	for (auto i = 0; i < NUMBER_OF_FRAMES_IN_FLIGHT; i++)
-	{
-		m_gpu->deleteSemaphore(m_renderFinishedSemaphores[i]);
-		m_gpu->deleteSemaphore(m_imageAvailableSemaphores[i]);
-		m_gpu->deleteFence(m_frameFences[i]);
-	}
 }
 
 bool Renderer::createSyncObjects()

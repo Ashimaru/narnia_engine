@@ -8,12 +8,11 @@ class Renderer
 {
 public:
 	Renderer();
-	~Renderer() = default;
+	~Renderer();
 
 	bool init(const GPUPtr &gpu, const ResourceManagerAPIPtr &resMan, SimpleRenderMode renderMode);
 
 	void draw();
-	void cleanUp();
 
 private:
 	bool createSyncObjects();

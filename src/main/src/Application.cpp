@@ -8,35 +8,25 @@ Application::Application() :
 	m_renderEngine{RenderEngineAPI::createInstance()},
 	m_isExiting{ false }
 {
-}
-
-int Application::init()
-{
-	int result = 0;
 	m_resourceManager->LoadResources();
-	
-	result = m_renderEngine->init(m_resourceManager);
-	if (0 != result)
-	{
-		return result;
-	}
-	
-	return 0;
+	assert(m_renderEngine->init(m_resourceManager));
 }
 
 void Application::run()
 {
+	m_renderEngine->createObject("DUMMY", "rectangle");
+	m_renderEngine->createObject("TestTriangle", "triangle");
+
 	while (!m_isExiting)
 	{
 		m_isExiting = m_renderEngine->pollForWindowClose();
 		m_renderEngine->drawScene();
-
 	}
 
 	m_renderEngine->waitForRendererToFinish();
 }
 
-void Application::cleanUp()
+Application::~Application()
 {
 	m_renderEngine->cleanUp();
 	m_resourceManager->cleanUp();

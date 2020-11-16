@@ -7,11 +7,9 @@ class Application
 {
 public:
 	Application();
-	~Application() = default;
+	~Application();
 
-	int init();
 	void run();
-	void cleanUp();
 private:
 
 	ResourceManagerAPIPtr m_resourceManager;
